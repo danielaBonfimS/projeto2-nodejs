@@ -42,8 +42,6 @@ app.post('/tarefas', async (req, res) => {
 })
 
 app.get('/tarefas', async (req, res) => {
-
-
   try{
     const taskList = await new DAO().getTasks();
     res.status(200).send(taskList.getTasksSortedByCreation);
@@ -53,11 +51,41 @@ app.get('/tarefas', async (req, res) => {
   }
 })
 
-app.put('/tarefas/:id', (req, res) => {
+app.get('/tarefas/:id', async (req, res) => {
+  const id = req.params.id;
+  try{
+    const task = await new DAO().getTask(id);
+    res.status(200).send(task);
+  }catch(e){
+    console.log(e);
+    res.status(500).send('Erro ao buscar tarefa');
+  }
 })
 
-app.delete('/tarefas/:id', (req, res) => {
- 
+app.patch('/tarefas/:id', async (req, res) => {
+  const body = req.body;
+  const id = req.params.id;
+
+  console.log(body)
+  try{
+    const task = await new DAO().updateTask(id, body);
+    res.status(200).send(task);
+  }catch(e){
+    console.log(e);
+    res.status(500).send('Erro ao atualizar tarefa');
+  }
+})
+
+app.delete('/tarefas/:id', async (req, res) => {
+  const id = req.params.id;
+  console.log(id)
+  try{
+    const hasDeleted = await new DAO().deleteTask(id);
+    res.status(200).send(hasDeleted);
+  }catch(e){
+    console.log(e);
+    res.status(500).send('Erro ao deletar tarefa');
+  }
 })
 
 module.exports = {

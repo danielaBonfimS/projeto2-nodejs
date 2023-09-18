@@ -33,11 +33,42 @@ class DAO {
     return this._mapToTasksListEntity(tasks);
   }
 
+  async getTask(id) {
+    const task = (await pg.transaction(trx => {
+      return trx(this.taskTable)
+      .where({id: id})
+      .returning('*')
+
+    }))[0]
+    return this._mapToEntityTask(task);
+  }
+
+  async deleteTask(id){
+    await pg.transaction(trx => {
+      return trx(this.taskTable)
+      .whereIn('id', [id])
+      .del()
+    })
+    return true;
+  }
+
+  async updateTask(id, body){
+    const updatedTask = (await pg.transaction(trx => {
+      return trx(this.taskTable)
+      .where('id', id)
+      .update(body)
+      .returning('*')
+    }))[0]
+
+    console.log(updatedTask)
+    return this._mapToEntityTask(updatedTask);
+  }
+
   _mapToDb(task) {
     return {
       id: task.id,
       label: task.label,
-      descript: task.description,
+      description: task.description,
       deadline: task.deadline
     }
   }
@@ -46,7 +77,7 @@ class DAO {
     return new Task({
       createdAt: json.created_at_utc,
       deadline: json.deadline,
-      description: json.descript,
+      description: json.description,
       id: json.id,
       label: json.label
     })
